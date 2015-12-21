@@ -22,13 +22,11 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 int max(char a[],int len){
-	int max=a[i];
-	int rem=0;
+	int maxi=0;
 	for(int i=0;i<len;i++){
-		if(a[i]>max){
-			max=a[i];
-			rem=i;
+		if(a[i]>a[maxi]){
+			maxi=i;
 		}
 	}
-return rem;
+return maxi;
 }
