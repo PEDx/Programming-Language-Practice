@@ -1,91 +1,152 @@
 #include<stdio.h>
 #include<stdlib.h>
-typedef struct Itm *List;
-struct Itm{
+typedef struct PolyNode *Polynomial;
+struct PolyNode{
   int coef;
   int expon;
+  Polynomial link;
 };
-void pro(List a,int cnt1,List b,int cnt2){
-	List proList=(List)malloc(sizeof(struct Itm)*cnt1*cnt2);
-	int k=0;
-	for(int i=0;i<cnt2;i++){
-		for(int j=0;j<cnt1;j++){
-			proList[k].coef=b[i].coef*a[j].coef;
-			proList[k].expon=b[i].expon+a[j].expon;
-			k++;
-		}
-	}
-	for(int i=0;i<k;i++){
-		if(i!=k-1){
-			printf("%d %d ",proList[i].coef,proList[i].expon);
-		}else printf("%d %d\n",proList[i].coef,proList[i].expon);	
-	}
+void Attach(int c,int e,Polynomial *pRear){//因为参数传递为值传递，因此此处要传入指向Polynomial（本来也是指向结构体PolyNode的指针）类型的指针
+  Polynomial P;
+  P=(Polynomial)malloc(sizeof(struct PolyNode));
+  P->coef=c;
+  P->expon=e;
+  P->link=NULL;
+  (*pRear)->link=P;
+  *pRear=P;//我们必须修改指针指向的值，而不是直接修改指针或者参数，这样才能改变预期要改变的值；
 }
-int compare(int a,int b){
-	if(a>b) return 1;
-	else if(a==b) return 0;
-	else if(a<b) return -1;
-}
-void add(List a,int cnt1,List b,int cnt2){
-	List addList=(List)malloc(sizeof(struct Itm)*(cnt1+cnt2));
-	int i=0;
-	int j=0;
-	int k;
-	for(k=0;k<cnt1+cnt2&&j<cnt2;k++){
-		switch (compare(a[i].expon,b[j].expon)){
-			case 1:
-				addList[k].coef=a[i].coef;
-				addList[k].expon=a[i].expon;
-				i++;
-				break;
-			case -1:
-				addList[k].coef=b[j].coef;
-				addList[k].expon=b[j].expon;
-				j++;
-				break;
-			case 0:
-				int sum=a[i].coef+b[j].coef;
-				if(sum) addList[k].coef=sum;
-				addList[k].expon=a[i].expon;
-				i++;
-				j++;
-				break;	
-		}	
-	}
-	for(;i<cnt1;i++){
-		addList[k].coef=a[i].coef;
-		addList[k].expon=a[i].expon;
-		k++;
-	}
-	for(;j<cnt2;i++){
-		addList[k].coef=b[j].coef;
-		addList[k].expon=b[j].expon;
-		k++;
-	}		
-	for(int i=0;i<k;i++){
-		if(i!=0){
-			printf(" %d %d",addList[i].coef,addList[i].expon);
-		}else printf("%d %d",addList[i].coef,addList[i].expon);	
-	}
-}
-int main(int argc, char const *argv[]) {
-  int cnt1=0;
-  int cnt2=0;
-  scanf("%d",&cnt1);
-  List itmList=(List)malloc(sizeof(struct Itm)*cnt1);
-  for(int i=0;i<cnt1;i++){
-    struct Itm L;
-    scanf("%d %d",&L.coef,&L.expon);
-    itmList[i]=L;
+Polynomial ReadPoly(){
+  Polynomial P,Rear,t;
+  int c,e,N;
+  scanf("%d",&N);
+  P=(Polynomial)malloc(sizeof(struct PolyNode));
+  P->link=NULL;
+  Rear=P;
+  while(N--){
+    scanf("%d %d",&c,&e);
+    Attach(c,e,&Rear);
   }
-  scanf("%d",&cnt2);
-  List itmList2=(List)malloc(sizeof(struct Itm)*cnt2);
-  for(int i=0;i<cnt2;i++){
-    struct Itm L;
-    scanf("%d %d",&L.coef,&L.expon);
-    itmList2[i]=L;
+  t=P;
+  P=P->link;
+  free(t);
+  return P;
+}
+Polynomial Add(Polynomial P1,Polynomial P2){
+  Polynomial P,Rear,t,t1,t2;
+  int sum;
+  t1=P1;
+  t2=P2;
+  P=(Polynomial)malloc(sizeof(struct PolyNode));
+  P->link=NULL;
+  Rear=P;
+  while(t1&&t2){
+    if(t1->expon==t2->expon){
+      // Polynomial P;
+      // P=(Polynomial)malloc(sizeof(struct PolyNode));
+      // P->coef=t1->coef+t2->coef;
+      // P->expon=t1->expon;
+      // P->link=NULL;
+      // Rear->link=P;
+      // Rear=P;
+      sum=t1->coef+t2->coef;
+      if(sum) Attach(sum,t1->expon,&Rear);
+      t1=t1->link;
+      t2=t2->link;
+    }
+    else if(t1->expon>t2->expon){
+      Attach(t1->coef,t1->expon,&Rear);
+      t1=t1->link;
+    }
+    else{
+      Attach(t2->coef,t2->expon,&Rear);
+      t2=t2->link;
+    }
   }
-  pro(itmList,cnt1,itmList2,cnt2);
-  add(itmList,cnt1,itmList2,cnt2);		
+  while(t1){
+    Attach(t1->coef,t1->expon,&Rear);
+    t1=t1->link;
+  }
+  while(t2){
+    Attach(t2->coef,t2->expon,&Rear);
+    t2=t2->link;
+  }
+  t=P;
+  P=P->link;
+  free(t);
+  return P;
+}
+Polynomial Mult(Polynomial P1,Polynomial P2){
+  Polynomial P,Rear,t,t1,t2,f;
+  int c,e;
+  if(!(P1&&P2)) return NULL;
+  t1=P1;
+  t2=P2;
+  P=(Polynomial)malloc(sizeof(struct PolyNode));
+  P->link=NULL;
+  Rear=P;
+  while(t2){
+    Attach(t1->coef*t2->coef,t1->expon+t2->expon,&Rear);
+    t2=t2->link;
+  }
+  t1=t1->link;
+  while(t1){
+    t2=P2;
+    Rear=P;
+    while(t2){
+      c=t1->coef*t2->coef;
+      e=t1->expon+t2->expon;
+      while(Rear->link&&Rear->link->expon>e){
+        Rear=Rear->link;
+      }
+      if(Rear->link&&Rear->link->expon==e){
+        if(Rear->link->coef+c){
+          Rear->link->coef+=c;
+        }
+        else{
+          t=Rear->link;
+          Rear->link=Rear->link->link;
+          free(t);
+        }
+      }
+      else{
+          t=(Polynomial)malloc(sizeof(struct PolyNode));
+          t->link=Rear->link;
+          t->coef=c;
+          t->expon=e;
+          Rear->link=t;
+          Rear=Rear->link;
+      }
+      t2=t2->link;
+    }
+    t1=t1->link;
+  }
+  t=P;
+  P=P->link;
+  free(t);
+  return P;
+}
+void PrintPoly(Polynomial P){
+  int flag=0;
+  if(!P){
+    printf("0 0");
+    return ;
+  } 
+  while(P){
+    if(!flag){
+      flag=1;
+    }else printf(" ");
+    printf("%d %d",P->coef,P->expon);
+    P=P->link;
+  }
+}
+int main(){
+  Polynomial P1,P2,PP,PS;
+  P1=ReadPoly();
+  P2=ReadPoly();
+  PP=Mult(P1,P2);
+  PrintPoly(PP);
+  PS=Add(P1,P2);
+  printf("\n");
+  PrintPoly(PS);
   return 0;
-} 
+}
