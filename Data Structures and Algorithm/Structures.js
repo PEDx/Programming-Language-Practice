@@ -132,7 +132,7 @@ function LinkedList() {
     };
     var length = 0;
     var head = null;
-    this.getHead=function(){
+    this.getHead = function() {
         return head;
     };
     this.append = function(element) {
@@ -507,10 +507,11 @@ function HashTable() {
 //散列集合
 
 //散列冲突问题（例如490行（hash % 37）会导致散列值的重复概率非常大）
+//处理散列表中的冲突
 // 1.分裂链接
 //将散列表以链表的方式实现，同个散列值可以对应多个链表元素
 
-function HashTable() {
+function LinkHashTable() {
     var table = {};
     var loseloseHashCode = function(key) {
         var hash = 0;
@@ -532,33 +533,69 @@ function HashTable() {
         if (table[position] === undefined) {
             table[position] = new LinkedList();
         }
-        table[position].append(ValuePair(key, value));
+        table[position].append(new ValuePair(key, value));
     };
     this.remove = function(key) {
         var position = table[loseloseHashCode(key)];
-        if (table[position] !== undefined){
-            var current=table[position].getHead,
+        if (table[position]) {
+            var current = table[position].getHead(),
                 previous;
-            while(current.next&&current.element.key!==key){
-                previous=current;
-                current=current.next;
+            while (current && current.element.key !== key) {
+                previous = current;
+                current = current.next;
             }
-            previous.next=current.next;
-        }else{
-            return false;
+            if (!current) {
+                return false;
+            }
+            previous.next = previous.next ? current.next : null;
+            if (table[position].isEmpt()) {
+                table[position] = undefined;
+            }
+            return true;
         }
+        return false;
     };
     this.get = function(key) {
         var position = table[loseloseHashCode(key)];
-        if (table[position] !== undefined){
-            var current=table[position].getHead;
-            while(current&&current.element.key!==key){
-                current=current.next;
+        if (table[position]) {
+            var current = table[position].getHead;
+            while (current && current.element.key !== key) {
+                current = current.next;
             }
-            return current.element.value;
-        }else{
-            return undefined;
+            return current ? current.element.value : undefined;
         }
+        return undefined;
     };
 
+}
+//2.线性探查
+function LineHashTable(){
+    var table = {};
+    var loseloseHashCode = function(key) {
+        var hash = 0;
+        for (var i = 0; i < key.length; i++) {
+            hash += key.charCodeAt(i);
+        }
+        return hash % 37;
+    };
+    var ValuePair = function(key, value) {
+        this.key = key;
+        this.value = value;
+        this.toString = function() {
+            return "[" + this.key + "-" + this.value + "]";
+        };
+    };
+    this.put=function(key,value){
+        var positon=loseloseHashCode(key);
+        if(!table[positon]){
+            table[positon]=ValuePair(key,value);
+        }
+        while(table[positon]){
+            position++;
+        }
+        table[positon]=new ValuePair(key,value);
+    };
+    this.get=function(key){
+
+    };
 }
