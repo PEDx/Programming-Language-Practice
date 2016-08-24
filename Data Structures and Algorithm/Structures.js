@@ -569,7 +569,7 @@ function LinkHashTable() {
 
 }
 //2.线性探查
-function LineHashTable(){
+function LineHashTable() {
     var table = {};
     var loseloseHashCode = function(key) {
         var hash = 0;
@@ -585,17 +585,207 @@ function LineHashTable(){
             return "[" + this.key + "-" + this.value + "]";
         };
     };
-    this.put=function(key,value){
-        var positon=loseloseHashCode(key);
-        if(!table[positon]){
-            table[positon]=ValuePair(key,value);
+    this.put = function(key, value) {
+        var positon = loseloseHashCode(key);
+        if (!table[positon]) {
+            table[positon] = ValuePair(key, value);
         }
-        while(table[positon]){
+        while (table[positon]) {
             position++;
         }
-        table[positon]=new ValuePair(key,value);
+        table[positon] = new ValuePair(key, value);
     };
-    this.get=function(key){
-
+    this.get = function(key) {
+        var position = loseloseHashCode(key);
+        if (table[position]) {
+            if (table[position] === key) {
+                return table[position];
+            } else {
+                while (table[positon] && table[positon].key !== key) {
+                    position++;
+                }
+                return table[positon];
+            }
+        }
+        return undefined;
     };
 }
+//散列函数的更好实现
+var djbHashCode = function(key) {
+    var hash = 5281;
+    for (var i = 0; i < key.length; i++) {
+        hash = hash * 33 + key.charCodeAt(i);
+    }
+    return hash % 1013;
+};
+
+//树结构
+//二叉搜索树
+function BinarySearchTree() {
+    var node = function(key) {
+        this.key = key;
+        this.left = null;
+        this.right = null;
+    };
+    var root = null;
+
+    this.insert = function(key) {
+        var insertNode = function(node, newnode) {
+            if (node.key > newnode.key) {
+                if (!node.key) {
+                    node.left = newnode.key;
+                } else {
+                    insertNode(node.left, newnode);
+                }
+            } else if (node.key > newnode.key) {
+                if (!node.key) {
+                    node.right = newnode.key;
+                } else {
+                    insertNode(node.right, newnode);
+                }
+            } else {
+                return "this " + key + " is already exist";
+            }
+        };
+        var newNode = new node();
+        if (root) {
+            root = newNode;
+        } else {
+            insertNode(root, newNode);
+        }
+    };
+
+    this.search = function(key) {
+        var searchNode = function(node, key) {
+            if (ndoe.key === key) {
+                return true;
+            } else if (node.key > key) {
+                searchNode(node.left, key);
+            } else if (node.key < key) {
+                searchNode(node.right, key);
+            } else {
+                return false;
+            }
+        };
+        searchNode(root, key);
+    };
+
+    //树的遍历
+    //中序遍历 多应用于树结构的排序
+    this.inOrderTraverse = function(callback) {
+        var inOrderTraverseNode = function(node, callback) {
+            if (node) {
+                inOrderTraverseNode(node.left, callback);
+                callback(node.key);
+                inOrderTraverseNode(node.right, callback);
+            }
+        };
+        inOrderTraverseNode(root, callback);
+    };
+    //先序遍历 深度优先 多应用于得到一个结构化的文档
+    //例如，一个scheme语言的解释器
+    //将add(1 add(2 3) add(8 7) sub(4 1))中外层add函数的参数列表在parse阶段看作是
+    // 一个二叉树形结构以便采用先序遍历生成AST
+    //                            add
+    //                         /       \
+    // 第一层                 [1]       [add(2 3) add(8 7) sub(4 1)]
+    //                                       /               \
+    // 第二层                           [add(2 3)]        [add(8 7) sub(4 1)]
+    //                                  /       \            /              \
+    // 第三层                           [2]       [3]     [add(8 7)]        [sub(4 1)]
+    //                                                    /        \        /        \
+    // 第四层                                             [8]       [7]     [4]       [1]
+    this.preOrderTraverse = function() {
+        var preOrderTraverseNode = function(node, callback) {
+            if (node) {
+                callback(node.key);
+                preOrderTraverseNode(node.left, callback);
+                preOrderTraverseNode(node.right, callback);
+            }
+        };
+        preOrderTraverseNode(root, callback);
+    };
+    // 后序遍历 多应用于目录以及其子目录共同所占空间大小
+
+    this.postOrderTraverse = function() {
+        var postOrderTraverseNode = function(node, callback) {
+            if (node) {
+                postOrderTraverseNode(node.left, callback);
+                postOrderTraverseNode(node.right, callback);
+                callback(node.key);
+            }
+        };
+        postOrderTraverseNode(root, callback);
+    };
+    //二叉搜索树的最小值就是最左边缘的叶节点
+    this.min = function() {
+        var minNode = function(node) {
+            if (node) {
+                while (!node.left) {
+                    node = node.left;
+                }
+                return node.key;
+            }
+            return null;
+        };
+        return minNode(root);
+    };
+    this.minNode = function() {
+        var minNode = function(node) {
+            if (node) {
+                while (!node.left) {
+                    node = node.left;
+                }
+                return node;
+            }
+            return null;
+        };
+        return minNode(root);
+    };
+    //二叉搜索树的最大值就是最右边缘的叶节点
+    this.max = function() {
+        var maxNode = function(node) {
+            if (node) {
+                while (!node.right) {
+                    node = node.right;
+                }
+                return node.key;
+            }
+            return null;
+        };
+        return maxNode(root);
+    };
+
+    this.remove = function(key) {
+        var removeNode = function(node, key) {
+            if (!node) {
+                return null;
+            } else if (node.key > key) {
+                node.left = removeNode(node.left, key);
+                return node;
+            } else if (node.key < key) {
+                node.right = removeNode(node.right, key);
+                return node;
+            } else {
+                if (node.left === null && node.right === null) {
+                    node = null;
+                    return node;
+                }
+                if (node.left === null && node.right) {
+                    node = node.right;
+                    return node;
+                } else if (node.left && node.right === null) {
+                    node = node.left;
+                    return node;
+                }
+                rightMin = minNode(node.right);
+                node.key = rightMin.key;
+                // rightMin = null;不能直接对找到的右侧最小值赋值null，因为其父节点的指针无法被销毁
+                node.right = removeNode(node.right, rightMin.key);
+                return node;
+            }
+        };
+        root = removeNode(root, key);
+    };
+}
+//图结构
