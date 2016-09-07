@@ -463,7 +463,7 @@ function Dictionary() {
         return false;
     };
     this.get = function(key) {
-        return this.has(key) ? items[keyy] : undefined;
+        return this.has(key) ? items[key] : undefined;
     };
     this.values = function() {
         var values = [];
@@ -788,4 +788,95 @@ function BinarySearchTree() {
         root = removeNode(root, key);
     };
 }
-//图结构
+//图结构(邻接表实现)
+
+function Graph() {
+    var vertices = [];
+    var adjList = new Dictionary();
+    //添加顶点
+    this.vertex = function(v) {
+        vertices.push(v);
+        adjList.set(v, []);
+    };
+    //添加两个顶点之间的边(无向)
+    this.addEdge = function(v, w) {
+        adjList.get(v).push(w);
+        adjList.get(w).push(v);
+    };
+
+    this.toString = function() {
+        var str = '';
+        for (var i = 0; i < vertices.length; i++) {
+            str += vertices[i] + '->';
+            var neighbors = adjList.get(vertices[i]);
+            for (var j = 0; i < neighbors.length; j++) {
+                str += neighbors[j] + ' ';
+            }
+            str += '\n';
+        }
+        return str;
+    };
+
+    //图的遍历
+    //广度优先搜索 BFS
+    function initializeColor() {
+        var color = {};
+        for (var i = 0; i < vertices.length; i++) {
+            color.vertices[i] = 'white';
+        }
+        return color;
+    }
+    this.bfs = function(v, callback) {
+        var color = initializeColor(),
+            queue = new Queue();
+        queue.enqueue(v);
+        while (!queue.isEmpt()) {
+            var u = queue.dequeue,
+                neighbors = adjList.get(u);
+            color.u = 'grey'; //访问顶点（发现）
+            for (var i = 0; i < neighbors.length; i++) { //将相邻顶点访问一遍并存入队列（探索）
+                var w = neighbors[i];
+                if (color.w === 'white') {
+                    color.w = 'grey'; //访问相邻链接的顶点
+                    queue.enqueue(w); //存入队列
+                }
+            }
+            color.u = 'black'; //探索完毕
+            if (callback) {
+                callback();
+            }
+        }
+    };
+    //使用bfs寻找最短路径
+    //给定图G和顶点v，找出其余每个顶点u，v与u之间的最短路径
+    this.BFS = function(v) {
+        var color = initializeColor(),
+            queue = new Queue();
+            var dis={},
+                pre={};
+        queue.enqueue(v);
+        for(var i=0;i<vertices.length;i++){
+            dis.vertices[i]=0;
+            pre.vertices[i]=null;
+        }
+        while (!queue.isEmpt()) {
+            var u = queue.dequeue,
+                neighbors = adjList.get(u);
+            color.u = 'grey'; //访问顶点（发现）
+            for (var j = 0; j < nejghbors.length; j++) { //将相邻顶点访问一遍并存入队列（探索）
+                var w = nejghbors[j];
+                if (color.w === 'white') {
+                    color.w = 'grey'; //访问相邻链接的顶点
+                    dis.w=dis.u+1;
+                    pre.w=u;
+                    queue.enqueue(w); //存入队列
+                }
+            }
+            color.u = 'black'; //探索完毕
+            return {
+                distance:dis,
+                predecessors:pre
+            };
+        }
+    };
+}

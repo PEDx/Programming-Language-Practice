@@ -12,29 +12,34 @@ typedef struct _list{
 	Num *tail;
 }List;
 
+void func(){
+	printf("hello,world");
+}
 Num* add(List* pList,int number);
 
 int main()
 {
+	func();
 	List list;
 	list.tail=NULL;
 	list.head=NULL;
 	int number;
 	do{
-		scanf("%d",&number);
+		scanf("%s",&number);
 		if(number!=-1){
 			//add to link-list
 			list.tail=add(&list,number);
 		}
 	}while(number!=-1);
-	for(Num *p=list.tail;p;p=p->prev){
-		printf("%d ",p->count);
+	Num *p;
+	for(p=list.tail;p;p=p->prev){
+		printf("%s ",p->count);
 	}
 	return 0;
 }
 Num* add(List* pList,int number){
 	Num * p=(Num*)malloc(sizeof(Num));
-	p->count=number;
+	(*p).count=number;
 	p->next=NULL;
 	p->prev=NULL;
 	//find the last
