@@ -1,3 +1,7 @@
+//常见数据结构
+
+
+
 //栈结构
 function Stack() {
     var items = [];
@@ -506,7 +510,7 @@ function HashTable() {
 }
 //散列集合
 
-//散列冲突问题（例如490行（hash % 37）会导致散列值的重复概率非常大）
+//散列冲突问题（hash % 37）会导致散列值的重复概率非常大）
 //处理散列表中的冲突
 // 1.分裂链接
 //将散列表以链表的方式实现，同个散列值可以对应多个链表元素
@@ -852,12 +856,12 @@ function Graph() {
     this.BFS = function(v) {
         var color = initializeColor(),
             queue = new Queue();
-            var dis={},
-                pre={};
+        var dis = {},
+            pre = {};
         queue.enqueue(v);
-        for(var i=0;i<vertices.length;i++){
-            dis.vertices[i]=0;
-            pre.vertices[i]=null;
+        for (var i = 0; i < vertices.length; i++) {
+            dis.vertices[i] = 0;
+            pre.vertices[i] = null;
         }
         while (!queue.isEmpt()) {
             var u = queue.dequeue,
@@ -867,16 +871,63 @@ function Graph() {
                 var w = nejghbors[j];
                 if (color.w === 'white') {
                     color.w = 'grey'; //访问相邻链接的顶点
-                    dis.w=dis.u+1;
-                    pre.w=u;
+                    dis.w = dis.u + 1;
+                    pre.w = u;
                     queue.enqueue(w); //存入队列
                 }
             }
             color.u = 'black'; //探索完毕
             return {
-                distance:dis,
-                predecessors:pre
+                distance: dis,
+                predecessors: pre
             };
         }
+    };
+    //配合BFS完成对给定图G和顶点v，打印出图中各顶点到顶点v之间的最短距离图式
+    var v = myVertices;
+    var shortestPathA = Graph(myVertices[0]);
+
+    function printDistance(v) {
+        var fromVertex = v;
+        for (var i = 0; i < v.length; i++) {
+            var toVertex = myVertices[i],
+                path = new Stack();
+            for (var j = toVertex; j !== fromVertex; j = shortestPathA.predecessors[j]) {
+                path.push(j);
+            }
+            path.push(fromVertex);
+            var s = path.pop();
+            while (!path.isEmpt()) {
+                s += '-' + path.pop();
+            }
+            console.log(s);
+        }
+    }
+
+    //深度优先搜索DFS
+    this.dfs = function(callback) {
+        var color = initializeColor();
+        for (var i = 0; i < vertices.length; i++) {
+            if (vertices[i].color === 'white') {
+                dfsVisit(vertices[i], color, callback);
+            }
+        }
+    };
+
+    function dfsVisit(u, color, callback) {
+        color[u] = 'gray';//发现
+        if (callback) callback(u);
+        var neighbors = adjList.get(u);
+        for (var i = 0; i < neighbors.length; i++) {
+            var w = neighbors[i];
+            if (color[w] === 'white') {
+                dfsVisit(w, color, callback);
+            }
+        }
+        color[u] = 'black';//运行到这时即探索完毕
+    }
+    //深度优先搜索的应用实例
+    //构建“森林”（有根树的一个集合）以及一组源顶点（根），并输出两个数组：发现时间和完成探索时间。
+    this.DFS=function(){
     };
 }
